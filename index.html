@@ -3,15 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hello World App</title>
+    <title>User Management</title>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 <body>
-    <h1>Message from Backend:</h1>
-    <div id="message"></div>
+    <h1>User Management</h1>
+
+    <h2>Add User</h2>
+    <form id="addUserForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <button type="submit">Add User</button>
+    </form>
+
+    <h2>All Users</h2>
+    <button id="refreshButton">Refresh Users</button>
+    <ul id="userList"></ul>
 
     <script>
-        // Make a GET request to the backend to fetch the message
+        document.getElementById('addUserForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const name = document.getElementById('name').value;
+            const password = document.getElementById('password').value;
+            
+            axios.post('https://rendertest-k24s.onrender.com/add_user', { name, password })
+                .then(function(response) {
+                    alert(response.data.message);
+                    document.getElementById('addUserForm').reset();
+                    loadUsers();
+                })
+                .catch(function(error) {
+                    alert(error.response.data.error);
+                });
+        });
+
+        document.getElementById('refreshButton').addEventListener('click', function() {
+            loadUsers();
+        });
+
+        function loadUsers() {
+            axios.get('https://rendertest-k24s.onrender.com/users')
+                .then(function(response) {
+                    const users = response.data;
+                    const userList = document.getElementById('userList');
+                    userList.innerHTML = '';
+                    users.forEach(function(user) {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = `Name: ${user.name}, Password: ${user.password}`;
+                        userList.appendChild(listItem);
+                    });
+                })
+                .catch(function(error) {
+                    console.error('Error fetching users:', error);
+                });
+        }
+
+        // Load users on page load
+        loadUsers();
+    </script>
+</body>
+</html>
+
         axios.get('https://rendertest-k24s.onrender.com/')
             .then(function (response) {
                 // Handle success
